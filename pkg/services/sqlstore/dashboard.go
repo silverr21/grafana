@@ -271,7 +271,7 @@ func findDashboards(query *search.FindPersistedDashboardsQuery) ([]DashboardSear
 		page = 1
 	}
 
-	sql, params := sb.ToSql(limit, page)
+	sql, params := sb.ToSQL(limit, page)
 	err := x.SQL(sql, params...).Find(&res)
 	if err != nil {
 		return nil, err
@@ -506,10 +506,10 @@ type DashboardSlugDTO struct {
 }
 
 func GetDashboardSlugById(query *models.GetDashboardSlugByIdQuery) error {
-	var rawSql = `SELECT slug from dashboard WHERE Id=?`
+	var rawSQL = `SELECT slug from dashboard WHERE Id=?`
 	var slug = DashboardSlugDTO{}
 
-	exists, err := x.SQL(rawSql, query.Id).Get(&slug)
+	exists, err := x.SQL(rawSQL, query.Id).Get(&slug)
 
 	if err != nil {
 		return err
@@ -533,11 +533,11 @@ func GetDashboardsBySlug(query *models.GetDashboardsBySlugQuery) error {
 }
 
 func GetDashboardUIDById(query *models.GetDashboardRefByIdQuery) error {
-	var rawSql = `SELECT uid, slug from dashboard WHERE Id=?`
+	var rawSQL = `SELECT uid, slug from dashboard WHERE Id=?`
 
 	us := &models.DashboardRef{}
 
-	exists, err := x.SQL(rawSql, query.Id).Get(us)
+	exists, err := x.SQL(rawSQL, query.Id).Get(us)
 
 	if err != nil {
 		return err
@@ -694,7 +694,7 @@ func HasEditPermissionInFolders(query *models.HasEditPermissionInFoldersQuery) e
 		return nil
 	}
 
-	builder := &SqlBuilder{}
+	builder := &SQLBuilder{}
 	builder.Write("SELECT COUNT(dashboard.id) AS count FROM dashboard WHERE dashboard.org_id = ? AND dashboard.is_folder = ?", query.SignedInUser.OrgId, dialect.BooleanStr(true))
 	builder.writeDashboardPermissionFilter(query.SignedInUser, models.PERMISSION_EDIT)
 
@@ -703,7 +703,7 @@ func HasEditPermissionInFolders(query *models.HasEditPermissionInFoldersQuery) e
 	}
 
 	resp := make([]*folderCount, 0)
-	if err := x.SQL(builder.GetSqlString(), builder.params...).Find(&resp); err != nil {
+	if err := x.SQL(builder.GetSQLString(), builder.params...).Find(&resp); err != nil {
 		return err
 	}
 
@@ -718,7 +718,7 @@ func HasAdminPermissionInFolders(query *models.HasAdminPermissionInFoldersQuery)
 		return nil
 	}
 
-	builder := &SqlBuilder{}
+	builder := &SQLBuilder{}
 	builder.Write("SELECT COUNT(dashboard.id) AS count FROM dashboard WHERE dashboard.org_id = ? AND dashboard.is_folder = ?", query.SignedInUser.OrgId, dialect.BooleanStr(true))
 	builder.writeDashboardPermissionFilter(query.SignedInUser, models.PERMISSION_ADMIN)
 
@@ -727,7 +727,7 @@ func HasAdminPermissionInFolders(query *models.HasAdminPermissionInFoldersQuery)
 	}
 
 	resp := make([]*folderCount, 0)
-	if err := x.SQL(builder.GetSqlString(), builder.params...).Find(&resp); err != nil {
+	if err := x.SQL(builder.GetSQLString(), builder.params...).Find(&resp); err != nil {
 		return err
 	}
 
